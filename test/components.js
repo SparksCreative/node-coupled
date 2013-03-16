@@ -1,13 +1,9 @@
-var coupler = require('../')
-  , util = require('util');
+var coupler = require('../');
 
 describe('components may be created', function() {
 
-    function ComponentA() {}
-    function ComponentB() {}
-
-    util.inherits(ComponentA, coupler.Component);
-    util.inherits(ComponentB, coupler.Component);
+    var ComponentA = coupler.componentize(function () {})
+      , ComponentB = coupler.componentize(function () {});
 
 
     describe('in the context of a particular set of events', function() {

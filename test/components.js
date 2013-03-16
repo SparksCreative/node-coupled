@@ -6,8 +6,8 @@ describe('components may be created', function() {
     function ComponentA() {}
     function ComponentB() {}
 
-    util.inherits(ConponentA, coupler.Component);
-    util.inherits(ConponentB, coupler.Component);
+    util.inherits(ComponentA, coupler.Component);
+    util.inherits(ComponentB, coupler.Component);
 
 
     describe('in the context of a particular set of events', function() {
@@ -28,4 +28,4 @@ describe('components may be created', function() {
             })
         })
     })
-})
+});

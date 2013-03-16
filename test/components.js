@@ -3,7 +3,7 @@ var coupler = require('../');
 describe('components may be created', function() {
 
     var ComponentA = coupler.component(function () {})
-        , ComponentB = coupler.component(function () {});
+      , ComponentB = coupler.component(function () {});
 
 
     describe('in the context of a particular set of events', function() {

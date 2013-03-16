@@ -1,0 +1,24 @@
+{
+    "name": "coupler",
+    "description": "A component manager for node.js - inverts control of binding event emitters with listeners.",
+    "version": "0.0.1",
+    "author" : "Sparks Creative Limited <enquiries@sparks.uk.net>",
+    "contributors" : [
+        {
+            "name" : "Simon Sparks",
+            "email" : "simon@sparks.uk.net"
+        }
+    ],
+    "devDependencies": {
+        "mocha": "*",
+        "should": "*"
+    },
+    "repository": "git://github.com/Sparks-Creative-Limited/coupler",
+    "scripts": {
+        "prepublish": "npm prune",
+        "test": "NODE_ENV=test ./node_modules/.bin/mocha"
+      },
+    "engines": {
+        "node": "*"
+    }
+}

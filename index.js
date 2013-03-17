@@ -28,7 +28,7 @@ Component.prototype.on = function(event, listener) {
     registry[receiver.context].forEach(function(component) {
         if(component != receiver) EventEmitter.prototype.on.call(component, event, function() {
             [].unshift.call(arguments, event);
-            EventEmitter.prototype.emit.apply(receiver, Array.apply(null, arguments));
+            EventEmitter.prototype.emit.apply(receiver, arguments);
         });
     });
 };

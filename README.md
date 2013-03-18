@@ -10,7 +10,7 @@ By specifying a shared context, loosely coupled components may receive events fr
 ## Sample
 
 ```js
-var coupled = require('../');
+var coupled = require('coupled');
 
 var Greeter = coupled(function (context) {
     this.setContext(context);

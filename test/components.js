@@ -95,7 +95,7 @@ describe('A component bound to the same context as another', function() {
 });
 
 describe('Many components in a shared context', function() {
-    var target = 3
+    var target = 5
       , Component = coupler.component(function(context, done) {
             this.setContext(context);
             this.receivedCount = 0;

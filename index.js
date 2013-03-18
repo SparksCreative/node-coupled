@@ -8,6 +8,19 @@ var EventEmitter = require('events').EventEmitter
 
 
 
+//===============
+// Module exports
+//===============
+
+var component = exports.component = function(target) {
+    util.inherits(target, Component);
+    target.prototype._listeners = {};
+    EventEmitter.call(target);
+    return target;
+};
+
+
+
 //================
 // Component class
 //================
@@ -16,75 +29,54 @@ function Component() {}
 
 util.inherits(Component, EventEmitter);
 
+Component.prototype.remember = function(event, listener) {
+    this._listeners[event] = listener;
+};
+
 Component.prototype.setContext = function(context) {
-    var component = this;
-    register(component, context);
-
-    if(component._coupler) component._coupler.forEach(function(event) { bindContext(component, event) });
-    registry[component.context].forEach(function(member) {
-        if(member != component) member._coupler.forEach(function(event) { bindComponents(component, member, event) });
-    });
-
-    return component;
+    return register(this, context);
 };
 
 Component.prototype.addListener = Component.prototype.on = function(event, listener) {
-    var component = this;
+    this.remember(event, listener);
 
-    if(component.context) bindContext(component, event);
-    remember(component, event);
+    getMembers(this.context, function(members) {
+        members.forEach(function(member) {
+            EventEmitter.prototype.addListener.call(member, event, listener);
+        });
+    });
 
-    return EventEmitter.prototype.addListener.call(component, event, listener);
+    return EventEmitter.prototype.addListener.call(this, event, listener);
 };
 
 
-// Hop marker object to place on emitted events.
-// Prevents receipt of the same event multiple times when there are many members of a context.
-// Doesn't resolve the combinatorial issue of delivering events though, will require a central event hub to be scalable.
-function Hop() {}
 
 //=================
 // Helper functions
 //=================
 
-var remember = function(component, event) {
-    if(!component._coupler) component._coupler = [];
-    component._coupler.push(event);
+var getMembers = function(context, cb) {
+    if(context) {
+        if(!registry[context]) registry[context] = [];
+        cb(registry[context]);
+    }
 };
 
 var register = function(component, context) {
-    component.context = context;
-    if(!registry[context]) registry[context] = [];
-    registry[context].push(component);
-};
+    getMembers(context, function(members) {
+        members.forEach(function(member) {
+            Object.keys(component._listeners).forEach(function(event) {
+                EventEmitter.prototype.addListener.call(member, event, component._listeners[event]);
+            });
 
-var bindContext = function(component, event) {
-    registry[component.context].forEach(function(member) {
-        if(member != component) bindComponents(member, component, event);
+            Object.keys(member._listeners).forEach(function(event) {
+                EventEmitter.prototype.addListener.call(component, event, member._listeners[event]);
+            });
+        });
+
+        component.context = context;
+        members.push(component);
     });
-};
 
-var bindComponents = function(source, target, event) {
-    if(source != target) EventEmitter.prototype.on.call(source, event, function() {
-        if(arguments[arguments.length-1] instanceof Hop) {
-            [].pop.call(arguments);
-        } else {
-            [].unshift.call(arguments, event);
-            [].push.call(arguments, new Hop());
-            EventEmitter.prototype.emit.apply(target, arguments);
-        }
-    });
-};
-
-
-
-//===============
-// Module exports
-//===============
-
-exports.component = function(target) {
-    util.inherits(target, Component);
-    target.prototype._coupler = [];
-    EventEmitter.call(target);
-    return target;
+    return component;
 };

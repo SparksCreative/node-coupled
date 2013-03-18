@@ -1,6 +1,6 @@
 var coupler = require('../');
 
-describe('A component bound to the same context as another', function() {
+describe.skip('A component bound to the same context as another', function() {
     var A = coupler.component(function () {})
       , B = coupler.component(function () {})
       , aContext = 'A Context'
@@ -35,9 +35,8 @@ describe('A component bound to the same context as another', function() {
         it('from within the component constructor', function(done) {
             var event = 'A Third Event'
               , C = coupler.component(function(context) {
-                    var self = this;
-                    self.setContext(context);
-                    self.on(event, function(received) {
+                    this.setContext(context);
+                    this.on(event, function(received) {
                         received.should.equal(payload);
                         done();
                     });
@@ -64,16 +63,14 @@ describe('A component bound to the same context as another', function() {
 
     describe('may be constructed', function() {
         var Sender = coupler.component(function (context, eventName) {
-                var self = this;
-                self.setContext(context);
-                self.send = function(payload, done) {
-                    self.emit(eventName, payload, done);
+                this.setContext(context);
+                this.send = function(payload, done) {
+                    this.emit(eventName, payload, done);
                 };
             })
           , Receiver = coupler.component(function(context, eventName) {
-                var self = this;
-                self.setContext(context);
-                self.on(eventName, function(received, done) {
+                this.setContext(context);
+                this.on(eventName, function(received, done) {
                     received.should.equal(payload);
                     done();
                 });
@@ -94,5 +91,31 @@ describe('A component bound to the same context as another', function() {
             var sender = new Sender(context2, event2);
             sender.send(payload, done);
         });
+    });
+});
+
+describe('Many components in a shared context', function() {
+    var target = 3
+      , Component = coupler.component(function(context, done) {
+            this.setContext(context);
+            this.receivedCount = 0;
+            this.send = function(event, payload) { this.emit(event, payload); }
+            this.on('SendCount', function() { if(++counter == target) done() });
+            this.on('ReceiveCount', function() { if(++this.receivedCount == target) if(++counter == target) done() });
+        })
+      , counter;
+
+    beforeEach(function() { counter = 0; });
+
+    it('send events to all other members', function(done) {
+        var member;
+        for(var i = 0; i < target; i++) member = new Component('SendCountContext', done);
+        member.send('SendCount', 'Payload');
+    });
+
+    it('receive events from all other members', function(done) {
+        var members = [];
+        for(var i = 0; i < target; i++) members.push(new Component('ReceiveCountContext', done));
+        members.forEach(function(member) { member.send('ReceiveCount', 'Payload'); });
     });
 });

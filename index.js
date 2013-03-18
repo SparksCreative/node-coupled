@@ -28,7 +28,7 @@ Component.prototype.setContext = function(context) {
     return component;
 };
 
-Component.prototype.on = Component.prototype.addListener = function(event, listener) {
+Component.prototype.addListener = Component.prototype.on = function(event, listener) {
     var component = this;
 
     if(component.context) bindContext(component, event);
@@ -38,6 +38,10 @@ Component.prototype.on = Component.prototype.addListener = function(event, liste
 };
 
 
+// Hop marker object to place on emitted events.
+// Prevents receipt of the same event multiple times when there are many members of a context.
+// Doesn't resolve the combinatorial issue of delivering events though, will require a central event hub to be scalable.
+function Hop() {}
 
 //=================
 // Helper functions
@@ -62,8 +66,13 @@ var bindContext = function(component, event) {
 
 var bindComponents = function(source, target, event) {
     if(source != target) EventEmitter.prototype.on.call(source, event, function() {
-        [].unshift.call(arguments, event);
-        EventEmitter.prototype.emit.apply(target, arguments);
+        if(arguments[arguments.length-1] instanceof Hop) {
+            [].pop.call(arguments);
+        } else {
+            [].unshift.call(arguments, event);
+            [].push.call(arguments, new Hop());
+            EventEmitter.prototype.emit.apply(target, arguments);
+        }
     });
 };
 

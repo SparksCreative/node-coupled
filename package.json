@@ -1,5 +1,5 @@
 {
-    "name": "coupler",
+    "name": "coupled",
     "description": "A component manager for node.js - inverts control of binding event emitters with listeners.",
     "version": "0.0.1",
     "author" : "Sparks Creative Limited <enquiries@sparks.uk.net>",
@@ -13,7 +13,12 @@
         "mocha": "*",
         "should": "*"
     },
-    "repository": "git://github.com/Sparks-Creative-Limited/coupler",
+    "keywords": [
+        "Loose coupling",
+        "component",
+        "events"
+    ],
+    "repository": "git@github.com:Sparks-Creative-Limited/node-coupled.git",
     "scripts": {
         "prepublish": "npm prune",
         "test": "NODE_ENV=test ./node_modules/.bin/mocha"

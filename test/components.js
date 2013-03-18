@@ -1,14 +1,14 @@
-var coupler = require('../');
+var coupled = require('../');
 
 describe('A component bound to the same context as another', function() {
-    var A = coupler.component(function () {})
-      , B = coupler.component(function () {})
+    var A = coupled(function () {})
+      , B = coupled(function () {})
       , aContext = 'A Context'
       , a = new A().setContext(aContext)
       , b = new B().setContext(aContext)
       , payload = 'Payload';
 
-    describe('receives events from the other member a listener is added to itself', function() {
+    describe('receives events from the other member when a listener is added to itself', function() {
 
         it('using the addListener function', function(done) {
             var event = 'An Event';
@@ -34,7 +34,7 @@ describe('A component bound to the same context as another', function() {
 
         it('from within the component constructor', function(done) {
             var event = 'A Third Event'
-              , C = coupler.component(function(context) {
+              , C = coupled(function(context) {
                     this.setContext(context);
                     this.on(event, function(received) {
                         received.should.equal(payload);
@@ -47,7 +47,7 @@ describe('A component bound to the same context as another', function() {
         });
 
         it('before setting the context', function(done) {
-            var D = coupler.component(function () {})
+            var D = coupled(function () {})
               , d = new D()
               , event = 'Event 4';
 
@@ -62,13 +62,13 @@ describe('A component bound to the same context as another', function() {
     });
 
     describe('may be constructed', function() {
-        var Sender = coupler.component(function (context, eventName) {
+        var Sender = coupled(function (context, eventName) {
                 this.setContext(context);
                 this.send = function(payload, done) {
                     this.emit(eventName, payload, done);
                 };
             })
-          , Receiver = coupler.component(function(context, eventName) {
+          , Receiver = coupled(function(context, eventName) {
                 this.setContext(context);
                 this.on(eventName, function(received, done) {
                     received.should.equal(payload);
@@ -96,7 +96,7 @@ describe('A component bound to the same context as another', function() {
 
 describe('Many components in a shared context', function() {
     var target = 5
-      , Component = coupler.component(function(context, done) {
+      , Component = coupled(function(context, done) {
             this.setContext(context);
             this.receivedCount = 0;
             this.send = function(event, payload) { this.emit(event, payload); }

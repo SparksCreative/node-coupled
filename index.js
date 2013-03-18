@@ -1,23 +1,6 @@
-//====================
-// Module dependencies
-//====================
-
 var EventEmitter = require('events').EventEmitter
   , util = require('util')
   , registry = {};
-
-
-
-//===============
-// Module exports
-//===============
-
-var component = exports.component = function(target) {
-    util.inherits(target, Component);
-    target.prototype._listeners = {};
-    EventEmitter.call(target);
-    return target;
-};
 
 
 
@@ -51,9 +34,9 @@ Component.prototype.addListener = Component.prototype.on = function(event, liste
 
 
 
-//=================
-// Helper functions
-//=================
+//===================
+// Registry functions
+//===================
 
 var getMembers = function(context, cb) {
     if(context) {
@@ -79,4 +62,17 @@ var register = function(component, context) {
     });
 
     return component;
+};
+
+
+
+//===============
+// Module exports
+//===============
+
+module.exports = function(target) {
+    util.inherits(target, Component);
+    target.prototype._listeners = {};
+    EventEmitter.call(target);
+    return target;
 };

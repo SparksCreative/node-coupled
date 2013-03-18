@@ -22,12 +22,13 @@ Component.prototype.setContext = function(context) {
     return component;
 };
 
-Component.prototype.on = function(event, listener) {
+Component.prototype.on = Component.prototype.addListener = function(event, listener) {
     var component = this;
-    EventEmitter.prototype.on.call(component, event, listener);
 
     if(component.context) bind(component, event);
     else remember(component, event);
+
+    return EventEmitter.prototype.addListener.call(component, event, listener);
 };
 
 

@@ -35,5 +35,18 @@ describe('component instances bound to the same context', function() {
             c.setContext(context);
             b.emit(event, payload);
         });
+
+        it('using the addListener function', function(done) {
+            var D = coupler.component(function () {})
+              , d = new D().setContext(context)
+              , event = 'YAE';
+
+            d.addListener(event, function(received) {
+                received.should.equal(payload);
+                done();
+            });
+
+            b.emit(event, payload);
+        });
     });
 });

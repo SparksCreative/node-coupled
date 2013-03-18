@@ -1,6 +1,6 @@
 var coupler = require('../');
 
-describe.skip('A component bound to the same context as another', function() {
+describe('A component bound to the same context as another', function() {
     var A = coupler.component(function () {})
       , B = coupler.component(function () {})
       , aContext = 'A Context'

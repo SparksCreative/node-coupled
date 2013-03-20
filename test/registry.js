@@ -1,6 +1,5 @@
 var hub = require('../lib/hub')
-  , component = require('../lib/component')
-  , util = require('util')
+  , Component = require('../lib/component')
   , should = require('should');
 
 
@@ -124,19 +123,6 @@ describe('Registry instances', function() {
         });
     });
 
-    var componentClass = function() { this.name = 'testComponent'; };
-    util.inherits(componentClass, component.Component);
-
-    describe('create component instances', function() {
-
-        it('and return their value', function() {
-            hub.access('reg1', function(err, registry) {
-                var instance = registry.initialise(componentClass);
-                instance.name.should.equal('testComponent');
-            });
-        });
-    });
-
     describe('send events', function() {
 
         it('when contexts are created', function(done) {
@@ -163,17 +149,6 @@ describe('Registry instances', function() {
             });
         });
 
-        it('when components are created', function(done) {
-            hub.access('reg1', function(err, registry) {
-                registry.once('component-created', function(component) {
-                    component.name.should.equal('testComponent');
-                    done();
-                });
-
-                registry.initialise(componentClass);
-            });
-        });
-
         it('when a component context is set', function(done) {
             hub.access('reg1', function(err, registry) {
                 registry.once('context-set', function(component, context) {
@@ -182,7 +157,8 @@ describe('Registry instances', function() {
                     done();
                 });
 
-                registry.initialise(componentClass).setContext('testContext');
+                var componentClass = Component(registry, function() { this.name = 'testComponent'; });
+                new componentClass().setContext('testContext');
             });
         });
     });

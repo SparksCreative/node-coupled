@@ -13,6 +13,7 @@ describe('context instances', function() {
     before(function(done) {
         hub.create('context-test', function(err, reg) {
             registry = reg;
+            TestComponent = Component(registry, function() {} );
             done();
         });
     });
@@ -28,7 +29,6 @@ describe('context instances', function() {
         beforeEach(function(done) {
             registry.create('testContext', function(err, context) {
                 testContext = context;
-                TestComponent = Component(registry, function() {} );
                 done();
             });
         });
@@ -47,7 +47,7 @@ describe('context instances', function() {
             });
         });
 
-        it.skip('releasing them when their context is unset', function(done) {
+        it('releasing them when their context is unset', function(done) {
             new TestComponent('Instance A').setContext('testContext', function(err, instance1) {
                 Object.keys(testContext.members).length.should.equal(1);
                 testContext.members[instance1._componentId].should.equal(instance1);

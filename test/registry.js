@@ -13,13 +13,6 @@ describe('Registry instances', function() {
         });
     });
 
-    it('must have a unique name', function() {
-        hub.create('reg0', function(err, registry) {
-            should.exist(err);
-            should.not.exist(registry);
-        });
-    });
-
     it('are listed globally', function() {
         hub.create('reg1', function() {
             hub.list(function(err, list) {
@@ -64,7 +57,7 @@ describe('Registry instances', function() {
     describe('manage contexts', function() {
 
         it('by creating them', function(){
-            hub.access('reg1', function(err, registry) {
+            hub.create('reg1', function(err, registry) {
                 registry.create('context0', function(err, context) {
                     should.not.exist(err);
                     context.name.should.equal('context0');
@@ -72,17 +65,8 @@ describe('Registry instances', function() {
             });
         });
 
-        it('by ensuring they have unique names', function(){
-            hub.access('reg1', function(err, registry) {
-                registry.create('context0', function(err, context) {
-                    should.exist(err);
-                    should.not.exist(context);
-                });
-            });
-        });
-
         it('by listing them', function(){
-            hub.access('reg1', function(err, registry) {
+            hub.create('reg1', function(err, registry) {
                 registry.create('context1', function() {
                     registry.list(function(err, list) {
                         should.not.exist(err);
@@ -95,7 +79,7 @@ describe('Registry instances', function() {
         });
 
         it('by providing access to them', function(){
-            hub.access('reg1', function(err, registry) {
+            hub.create('reg1', function(err, registry) {
                 registry.access('context0', function(err, context) {
                     should.not.exist(err);
                     context.name.should.equal('context0');
@@ -104,7 +88,7 @@ describe('Registry instances', function() {
         });
 
         it('by deleting them', function(){
-            hub.access('reg1', function(err, registry) {
+            hub.create('reg1', function(err, registry) {
                 registry.delete('context0', function(err) {
                     should.not.exist(err);
 
@@ -123,10 +107,52 @@ describe('Registry instances', function() {
         });
     });
 
+    describe('listen for components having their context set and', function() {
+
+        var componentContext
+          , componentInstance;
+
+        it('create contexts when the first component is set for it', function(done) {
+            hub.create('reg1', function(err, registry) {
+                Component(registry, function() {}, function(err, TestComponent) {
+                    new TestComponent().setContext('ComponentContext', function(err, instance) {
+                        should.not.exist(err);
+                        componentInstance = instance;
+
+                        registry.access('ComponentContext', function(err, context) {
+                            should.not.exist(err);
+                            componentContext = context;
+
+                            Object.keys(context.members).length.should.equal(1);
+                            context.members[instance._componentId].should.equal(instance);
+                            done();
+                        });
+                    });
+                });
+            });
+        });
+
+        it('remove contexts when the last component is unset from it', function(done) {
+            hub.create('reg1', function(err, registry) {
+                componentInstance.setContext('Something else', function(err, instance) {
+                    should.not.exist(err);
+
+                    registry.access('ComponentContext', function(err) {
+                        should.exist(err);
+
+                        should.not.exist(componentContext.members[instance._componentId]);
+                        Object.keys(componentContext.members).length.should.equal(0);
+                        done();
+                    });
+                });
+            });
+        });
+    });
+
     describe('send events', function() {
 
         it('when contexts are created', function(done) {
-            hub.access('reg1', function(err, registry) {
+            hub.create('reg1', function(err, registry) {
                 registry.once('context-created', function(context) {
                     context.name.should.equal('context2');
                     done();
@@ -137,7 +163,7 @@ describe('Registry instances', function() {
         });
 
         it('when contexts are deleted', function(done) {
-            hub.access('reg1', function(err, registry) {
+            hub.create('reg1', function(err, registry) {
                 registry.once('context-deleted', function(context) {
                     context.name.should.equal('context3');
                     done();
@@ -146,19 +172,6 @@ describe('Registry instances', function() {
                 registry.create('context3', function() {
                     registry.delete('context3');
                 });
-            });
-        });
-
-        it('when a component context is set', function(done) {
-            hub.access('reg1', function(err, registry) {
-                registry.once('context-set', function(component, context) {
-                    component.name.should.equal('testComponent');
-                    context.should.equal('testContext');
-                    done();
-                });
-
-                var componentClass = Component(registry, function() { this.name = 'testComponent'; });
-                new componentClass().setContext('testContext');
             });
         });
     });

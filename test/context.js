@@ -24,7 +24,7 @@ describe('context instances', function() {
         });
     });
 
-    describe('manage component members by listening on their events', function() {
+    describe('manage component members by listening on component context events from the registry', function() {
 
         beforeEach(function(done) {
             registry.create('testContext', function(err, context) {
@@ -39,20 +39,20 @@ describe('context instances', function() {
             });
         });
 
-        it('consuming them when their context is set', function(done) {
-            new TestComponent().setContext('testContext', function(err, instanceA) {
+        it('consuming components with matching contexts', function(done) {
+            new TestComponent().setContext('testContext', function(err, instance) {
                 Object.keys(testContext.members).length.should.equal(1);
-                testContext.members[instanceA._componentId].should.equal(instanceA);
+                testContext.members[instance._componentId].should.equal(instance);
                 done();
             });
         });
 
-        it('releasing them when their context is unset', function(done) {
-            new TestComponent('Instance A').setContext('testContext', function(err, instance1) {
+        it('releasing components with different contexts', function(done) {
+            new TestComponent().setContext('testContext', function(err, instance) {
                 Object.keys(testContext.members).length.should.equal(1);
-                testContext.members[instance1._componentId].should.equal(instance1);
+                testContext.members[instance._componentId].should.equal(instance);
 
-                instance1.setContext(null, function(err, instance2) {
+                instance.setContext(null, function(err, instance2) {
                     should.not.exist(testContext.members[instance2._componentId]);
                     Object.keys(testContext.members).length.should.equal(0);
                     done();

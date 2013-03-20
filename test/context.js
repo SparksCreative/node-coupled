@@ -1,4 +1,4 @@
-var hub = require('../lib/hub')
+var hub = require('../lib/registry')
   , Component = require('../lib/component')
   , should = require('should');
 

@@ -8,56 +8,38 @@ var registry
 
 
 
-describe('context instances', function() {
+describe('Context instances', function() {
 
-    before(function(done) {
+    before(function() {
         hub.create('context-test', function(err, reg) {
             registry = reg;
             TestComponent = Component(registry, function() {} );
-            done();
         });
     });
 
-    after(function(done) {
-        hub.delete('context-test', function() {
-            done();
-        });
-    });
+    after(function() { hub.delete('context-test'); });
 
     describe('manage component members by listening on component context events from the registry', function() {
 
-        beforeEach(function(done) {
+        beforeEach(function() {
             registry.create('testContext', function(err, context) {
                 testContext = context;
-                done();
             });
         });
 
-        afterEach(function(done) {
-            registry.delete('testContext', function() {
-                done();
-            });
+        afterEach(function() { registry.delete('testContext'); });
+
+        it('consuming components with matching contexts', function() {
+            var instance = new TestComponent().setContext('testContext');
+            Object.keys(testContext.members).length.should.equal(1);
+            testContext.members[instance.getComponentId()].should.equal(instance);
         });
 
-        it('consuming components with matching contexts', function(done) {
-            new TestComponent().setContext('testContext', function(err, instance) {
-                Object.keys(testContext.members).length.should.equal(1);
-                testContext.members[instance._componentId].should.equal(instance);
-                done();
-            });
-        });
-
-        it('releasing components with different contexts', function(done) {
-            new TestComponent().setContext('testContext', function(err, instance) {
-                Object.keys(testContext.members).length.should.equal(1);
-                testContext.members[instance._componentId].should.equal(instance);
-
-                instance.setContext(null, function(err, instance2) {
-                    should.not.exist(testContext.members[instance2._componentId]);
-                    Object.keys(testContext.members).length.should.equal(0);
-                    done();
-                });
-            });
+        it('releasing components with different contexts', function() {
+            var instance = new TestComponent().setContext('testContext');
+            instance.setContext(null);
+            should.not.exist(testContext.members[instance.getComponentId()]);
+            Object.keys(testContext.members).length.should.equal(0);
         });
     });
 });

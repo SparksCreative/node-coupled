@@ -11,10 +11,8 @@ var registry
 describe('Context instances', function() {
 
     before(function() {
-        hub.create('context-test', function(err, reg) {
-            registry = reg;
-            TestComponent = Component(registry, function() {} );
-        });
+        registry = hub.create('context-test');
+        TestComponent = Component(registry, function() {} );
     });
 
     after(function() { hub.delete('context-test'); });

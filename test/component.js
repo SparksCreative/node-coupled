@@ -5,18 +5,16 @@ var hub = require('../lib/registry')
 describe('A component bound to the same context as another', function() {
     var registry
       , TestComponent
-      , a
-      , b
       , aContext = 'A Context'
-      , payload = 'Payload';
+      , payload = 'Payload'
+      , a
+      , b;
 
     beforeEach(function() {
-        hub.create('context-test', function(err, reg) {
-            registry = reg;
-            TestComponent = Component(registry, function(){});
-            a = new TestComponent().setContext(aContext);
-            b = new TestComponent().setContext(aContext);
-        });
+        registry = hub.create('context-test');
+        TestComponent = Component(registry, function(){});
+        a = new TestComponent().setContext(aContext);
+        b = new TestComponent().setContext(aContext);
     });
 
     afterEach(function() { hub.delete('context-test'); });
@@ -116,17 +114,14 @@ describe('Many components in a shared context', function() {
       , counter;
 
     before(function() {
-        hub.create('context-test', function(err, reg) {
-            registry = reg;
-
-            GroupComponent  = Component(registry, function(context, done) {
-                var self = this;
-                self.setContext(context);
-                self.receivedCount = 0;
-                self.send = function(event, payload) { self.emit(event, payload); };
-                self.on('SendCount', function() { if(++counter == target) done() });
-                self.on('ReceiveCount', function() { if(++self.receivedCount == target) if(++counter == target) done(); });
-            });
+        registry = hub.create('context-test');
+        GroupComponent  = Component(registry, function(context, done) {
+            var self = this;
+            self.setContext(context);
+            self.receivedCount = 0;
+            self.send = function(event, payload) { self.emit(event, payload); };
+            self.on('SendCount', function() { if(++counter == target) done() });
+            self.on('ReceiveCount', function() { if(++self.receivedCount == target) if(++counter == target) done(); });
         });
     });
 

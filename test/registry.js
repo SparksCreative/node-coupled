@@ -6,58 +6,49 @@ var hub = require('../lib/registry')
 
 describe('Registry instances', function() {
 
+    beforeEach(function() { hub.list().forEach(function(key) { hub.delete(key); }); });
+
     it('are constructed with an identifying name', function() {
-        hub.create('reg0', function(err, registry) {
-            should.not.exist(err);
-            registry.name.should.equal('reg0');
-        });
+        var registry = hub.create('reg0');
+        should.exist(registry);
+        registry.name.should.equal('reg0');
     });
 
     it('are listed globally', function() {
-        hub.create('reg1', function() {
-            hub.list(function(err, list) {
-                should.not.exist(err);
-                list.length.should.equal(2);
-                list[0].should.equal('reg0');
-                list[1].should.equal('reg1');
-            });
-        });
+        hub.create('reg0');
+        hub.create('reg1');
+
+        var list = hub.list();
+        list.length.should.equal(2);
+        list[0].should.equal('reg0');
+        list[1].should.equal('reg1');
     });
 
     it('may be referenced globally by their unique name', function() {
-        hub.access('reg0', function(err, registry) {
-            should.not.exist(err);
-            registry.name.should.equal('reg0');
-        });
+        hub.create('reg0');
+
+        var registry = hub.access('reg0');
+        should.exist(registry);
+        registry.name.should.equal('reg0');
     });
 
     it('may be deleted ', function() {
-        hub.delete('reg0', function(err) {
-            should.not.exist(err);
+        hub.create('reg0');
+        hub.create('reg1');
+        hub.delete('reg0');
 
-            hub.access('reg0', function(err, registry) {
-                should.exist(err);
-                should.not.exist(registry);
-            });
+        var registry = hub.access('reg0');
+        should.not.exist(registry);
 
-            hub.list(function(err, list) {
-                should.not.exist(err);
-                list.length.should.equal(1);
-                list[0].should.equal('reg1');
-            });
-        });
-    });
-
-    it('can not be deleted if they are not globally referenced', function() {
-        hub.delete('reg0', function(err) {
-            should.exist(err);
-        });
+        var list = hub.list();
+        list.length.should.equal(1);
+        list[0].should.equal('reg1');
     });
 
     describe('manage contexts', function() {
         var registry;
 
-        beforeEach(function() { hub.create('reg1', function(err, reg) { registry = reg; }); });
+        beforeEach(function() { registry = hub.create('reg1'); });
 
         afterEach(function() { hub.delete('reg1'); });
 
@@ -117,10 +108,8 @@ describe('Registry instances', function() {
           , TestComponent;
 
         beforeEach(function() {
-            hub.create('reg1', function(err, reg) {
-                registry = reg;
-                TestComponent = Component(registry, function() {});
-            });
+            registry =hub.create('reg1');
+            TestComponent = Component(registry, function() {});
         });
 
         afterEach(function() { hub.delete('reg1'); });
@@ -155,7 +144,7 @@ describe('Registry instances', function() {
     describe('send events', function() {
         var registry;
 
-        beforeEach(function() { hub.create('reg1', function(err, reg) { registry = reg; }); });
+        beforeEach(function() { registry = hub.create('reg1'); });
 
         afterEach(function() { hub.delete('reg1'); });
 

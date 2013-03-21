@@ -123,7 +123,7 @@ describe('Many components in a shared context', function() {
                 var self = this;
                 self.setContext(context);
                 self.receivedCount = 0;
-                self.send = function(event, payload) { self.emit(event, payload); }
+                self.send = function(event, payload) { self.emit(event, payload); };
                 self.on('SendCount', function() { if(++counter == target) done() });
                 self.on('ReceiveCount', function() { if(++self.receivedCount == target) if(++counter == target) done(); });
             });
